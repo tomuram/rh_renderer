@@ -60,7 +60,11 @@ Ptr<RhoanaBlender> RhoanaBlender::createDefault(int type, bool try_gpu)
         return makePtr<RhoanaFeatherBlender>();
     if (type == MULTI_BAND)
         return makePtr<RhoanaMultiBandBlender>(try_gpu);
+#if (CV_VERSION_MAJOR >= 4)
+    CV_Error(cv::Error::StsBadArg, "unsupported blending method");
+#else
     CV_Error(CV_StsBadArg, "unsupported blending method");
+#endif
     return Ptr<RhoanaBlender>();
 }
 
@@ -564,7 +568,8 @@ void normalizeUsingWeightMap(InputArray _weight, InputOutputArray _src)
 void createWeightMap(InputArray mask, float sharpness, InputOutputArray weight)
 {
     CV_Assert(mask.type() == CV_8U);
-    distanceTransform(mask, weight, CV_DIST_L1, 3);
+    //distanceTransform(mask, weight, CV_DIST_L1, 3); turam
+    distanceTransform(mask, weight, DIST_L1, 3);
     //threshold(weight * sharpness, weight, 1.f, 1.f, THRESH_TRUNC);
     UMat tmp;
     multiply(weight, sharpness, tmp);
@@ -653,7 +658,11 @@ void createLaplacePyrGpu(InputArray img, int num_levels, vector<UMat> &pyr)
     (void)img;
     (void)num_levels;
     (void)pyr;
+#if (CV_VERSION_MAJOR >= 4)
+    CV_Error(cv::Error::StsNotImplemented, "CUDA optimization is unavailable");
+#else
     CV_Error(CV_StsNotImplemented, "CUDA optimization is unavailable");
+#endif
 #endif
 }
 
@@ -691,7 +700,11 @@ void restoreImageFromLaplacePyrGpu(vector<UMat> &pyr)
     gpu_pyr[0].download(pyr[0]);
 #else
     (void)pyr;
+#if (CV_VERSION_MAJOR >= 4)
+    CV_Error(cv::Error::StsNotImplemented, "CUDA optimization is unavailable");
+#else
     CV_Error(CV_StsNotImplemented, "CUDA optimization is unavailable");
+#endif
 #endif
 }
 

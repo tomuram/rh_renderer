@@ -32,7 +32,12 @@ void convertToRGBImages(std::vector<UMat> &images)
     for (size_t i = 0; i < images.size(); i++)
     {
         assert(images[i].channels() == 1);
+#if (CV_VERSION_MAJOR >= 4)
+        cvtColor(images[i], images[i], cv::COLOR_GRAY2RGB);
+#else
         cvtColor(images[i], images[i], CV_GRAY2RGB);
+#endif
+
     }
 }
 

@@ -359,7 +359,11 @@ void RhoanaGraphCutSeamFinder::Impl::findInPair(size_t first, size_t second, Rec
                                  submask1, submask2, graph);
         break;
     default:
+#if (CV_VERSION_MAJOR >= 4)
+        CV_Error(cv::Error::StsBadArg, "unsupported pixel similarity measure");
+#else
         CV_Error(CV_StsBadArg, "unsupported pixel similarity measure");
+#endif
     }
 #if ENABLE_LOG
     LOGLN(" graph creation: " << ((getTickCount() - pt) / getTickFrequency()) << " sec (vertices: " << vertex_count << ", edges: " << edge_count << ")");
