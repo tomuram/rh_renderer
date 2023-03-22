@@ -10,13 +10,13 @@ VERSION = '0.0.5'
 
 README = open('README.md').read()
 
-flags = subprocess.check_output(['pkg-config', '--cflags-only-I', 'opencv'])
+flags = subprocess.check_output(['pkg-config', '--cflags-only-I', 'opencv4'])
 include_dirs_list = [str(flag[2:].decode('utf-8')) for flag in flags.split()]
 include_dirs_list.append('.')
 include_dirs_list.append(np.get_include())
-flags = subprocess.check_output(['pkg-config', '--libs-only-L', 'opencv'])
+flags = subprocess.check_output(['pkg-config', '--libs-only-L', 'opencv4'])
 library_dirs_list = flags
-flags = subprocess.check_output(['pkg-config', '--libs', 'opencv'])
+flags = subprocess.check_output(['pkg-config', '--libs', 'opencv4'])
 libraries_list = []
 for flag in flags.split():
     libraries_list.append(str(flag.decode('utf-8')))
