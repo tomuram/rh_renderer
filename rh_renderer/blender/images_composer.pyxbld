@@ -6,17 +6,17 @@ import numpy
 if sys.platform == "darwin":
     os.environ["CC"] = "gcc-4.9"
 
-flags = subprocess.check_output(['pkg-config', '--cflags-only-I', 'opencv'])
-include_dirs_list = [flag[2:] for flag in flags.split()]
+flags = subprocess.check_output(['pkg-config', '--cflags-only-I', 'opencv4'])
+include_dirs_list = [flag[2:].decode('utf-8') for flag in flags.split()]
 include_dirs_list.append('.')
 include_dirs_list.append(os.path.dirname(os.path.abspath(__file__)))
 include_dirs_list.append(numpy.get_include())
-flags = subprocess.check_output(['pkg-config', '--libs-only-L', 'opencv'])
-library_dirs_list = flags
-flags = subprocess.check_output(['pkg-config', '--libs', 'opencv'])
+flags = subprocess.check_output(['pkg-config', '--libs-only-L', 'opencv4'])
+library_dirs_list = flags.decode('utf-8')
+flags = subprocess.check_output(['pkg-config', '--libs', 'opencv4'])
 libraries_list = []
 for flag in flags.split():
-    libraries_list.append(flag)
+    libraries_list.append(flag.decode('utf-8'))
 
 def make_ext(modname, pyxfilename):
     from distutils.extension import Extension
