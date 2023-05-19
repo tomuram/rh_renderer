@@ -4,7 +4,7 @@ from .single_tile_affine_renderer import SingleTileAffineRenderer
 import json
 import numpy as np
 from . import models
-
+import asyncio
 
 class TilespecAffineRenderer:
 
@@ -35,7 +35,9 @@ class TilespecAffineRenderer:
 #                 tile.add_transformation(transform.get_matrix()[:2])
 
         self.multi_renderer = MultipleTilesAffineRenderer(self.single_tiles, blend_type=blend_type)
-        
+
+    def async_cache(self):
+        asyncio.run(self.multi_renderer.async_cache())
 
     def render(self):
         return self.multi_renderer.render()

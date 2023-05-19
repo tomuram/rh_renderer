@@ -2,6 +2,7 @@ from .single_tile_affine_renderer import SingleTileAffineRenderer
 import numpy as np
 import tinyr
 from enum import Enum
+import asyncio
 
 class BlendType(Enum):
     NO_BLENDING = 0
@@ -41,6 +42,12 @@ class MultipleTilesAffineRenderer:
             # using the (x_min, y_min, x_max, y_max) notation
             self.rtree.insert(single_tile, (bbox[0], bbox[2], bbox[1], bbox[3]))
         
+    async def async_cache(self):
+        if len(self.single_tiles) == 0:
+            return
+        # Render all tiles by finding the bounding box, and using crop
+        await asyncio.gather([t.async_cache() for t in self.single_tiles])
+
     def render(self):
         if len(self.single_tiles) == 0:
             return None, None
