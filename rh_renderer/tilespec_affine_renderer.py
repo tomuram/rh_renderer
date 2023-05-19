@@ -37,6 +37,7 @@ class TilespecAffineRenderer:
         self.multi_renderer = MultipleTilesAffineRenderer(self.single_tiles, blend_type=blend_type)
 
     def async_cache(self):
+        '''concurrent caching of all tiles in RAM'''
         asyncio.run(self.multi_renderer.async_cache())
 
     def render(self):

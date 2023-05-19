@@ -43,9 +43,9 @@ class MultipleTilesAffineRenderer:
             self.rtree.insert(single_tile, (bbox[0], bbox[2], bbox[1], bbox[3]))
         
     async def async_cache(self):
+        '''concurrent caching of all tiles in RAM'''
         if len(self.single_tiles) == 0:
             return
-        # Render all tiles by finding the bounding box, and using crop
         await asyncio.gather([t.async_cache() for t in self.single_tiles])
 
     def render(self):
