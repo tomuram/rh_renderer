@@ -59,7 +59,7 @@ class MultipleTilesAffineRenderer:
 
     def crop(self, from_x, from_y, to_x, to_y):
         if len(self.single_tiles) == 0:
-            return None, None
+            return None
 
         # Distinguish between the different types of blending
         if self.blend_type == BlendType.NO_BLENDING: # No blending
@@ -120,5 +120,5 @@ class MultipleTilesAffineRenderer:
             res = res / res_weights
             res = res.astype(np.uint8)
 
-        return res, (from_x, from_y)
+        return res
 
