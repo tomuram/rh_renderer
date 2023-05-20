@@ -46,8 +46,7 @@ class MultipleTilesAffineRenderer:
         '''concurrent caching of all tiles in RAM'''
         if len(self.single_tiles) == 0:
             return
-        await asyncio.gather(*[t.async_cache() for t in self.single_tiles])
-
+        await asyncio.gather(*[t.async_cache() for t in self.single_tiles[:10]])
     def render(self):
         if len(self.single_tiles) == 0:
             return None, None
