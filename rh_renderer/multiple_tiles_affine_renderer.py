@@ -42,11 +42,19 @@ class MultipleTilesAffineRenderer:
             # using the (x_min, y_min, x_max, y_max) notation
             self.rtree.insert(single_tile, (bbox[0], bbox[2], bbox[1], bbox[3]))
         
-    async def async_cache(self):
-        '''concurrent caching of all tiles in RAM'''
+    async def async_cache(self, points):
+        '''concurrent caching of all tiles in RAM
+        load and cache only tiles that will be used'''
         if len(self.single_tiles) == 0:
             return
-        await asyncio.gather(*[t.async_cache() for t in self.single_tiles[:10]])
+        # filter only relevant tiles using rtree
+        tiles_to_load = []
+        for pt in points:
+            rect_res = self.rtree.search( pt )
+            for t in rect_res:
+                tiles_to_load.append(t)
+        await asyncio.gather(*[t.async_cache() for t in tiles_to_load])
+
     def render(self):
         if len(self.single_tiles) == 0:
             return None, None

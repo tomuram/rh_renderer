@@ -36,9 +36,10 @@ class TilespecAffineRenderer:
 
         self.multi_renderer = MultipleTilesAffineRenderer(self.single_tiles, blend_type=blend_type)
 
-    def async_cache(self):
-        '''concurrent caching of all tiles in RAM'''
-        asyncio.run(self.multi_renderer.async_cache())
+    def async_cache(self, points):
+        '''concurrent caching of all tiles in RAM
+        Each point consists of a (from_x, from_y, to_x, to_y) for rtree.search'''
+        asyncio.run(self.multi_renderer.async_cache(points))
 
     def render(self):
         return self.multi_renderer.render()
