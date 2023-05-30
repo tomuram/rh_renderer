@@ -39,7 +39,10 @@ class TilespecRenderer:
 #                             for tile_ts in tilespec]
         else: # non dynamic
             self.single_tiles = [SingleTileStaticRenderer(
-                                    tile_ts["mipmapLevels"]["0"]["imageUrl"].replace("file://", ""), tile_ts["width"], tile_ts["height"], bbox=tile_ts["bbox"], transformation_models=[models.Transforms.from_tilespec(modelspec) for modelspec in tile_ts["transforms"]], compute_mask=compute_mask, compute_distances=compute_distances, hist_adjuster=hist_adjuster)
+                                    tile_ts["mipmapLevels"]["0"]["imageUrl"].replace("file://", ""), tile_ts["width"], 
+                                    tile_ts["height"], bbox=tile_ts["bbox"], 
+                                    transformation_models=[models.Transforms.from_tilespec(modelspec) for modelspec in tile_ts["transforms"]], 
+                                    compute_mask=compute_mask, compute_distances=compute_distances, hist_adjuster=hist_adjuster)
                                 for tile_ts in tilespec]
 
         print("single tile renderers setup time: {}".format(time.time() - st_time))

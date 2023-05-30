@@ -48,11 +48,15 @@ class MultipleTilesAffineRenderer:
         if len(self.single_tiles) == 0:
             return
         # filter only relevant tiles using rtree
+        ##this is loading the same tile twice sometimes since its a list instead of creating a set
         tiles_to_load = []
+        unique_tiles = set()
         for pt in points:
             rect_res = self.rtree.search( pt )
             for t in rect_res:
-                tiles_to_load.append(t)
+                if t.img_path not in unique_tiles:
+                    tiles_to_load.append(t)
+                    unique_tiles.add(t.img_path)
         await asyncio.gather(*[t.async_cache() for t in tiles_to_load])
 
     def render(self):

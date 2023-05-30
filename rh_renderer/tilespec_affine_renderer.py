@@ -26,7 +26,12 @@ class TilespecAffineRenderer:
             raise Exception('Unknown blend type')
 
         self.single_tiles = [SingleTileAffineRenderer(
-                                tile_ts["mipmapLevels"]["0"]["imageUrl"].replace("file://", ""), tile_ts["width"], tile_ts["height"], bbox=tile_ts["bbox"], transformation_models=[models.Transforms.from_tilespec(modelspec) for modelspec in tile_ts["transforms"]], compute_mask=compute_mask, compute_distances=compute_distances)
+                                tile_ts["mipmapLevels"]["0"]["imageUrl"].replace("file://", ""), 
+                                tile_ts["width"], tile_ts["height"], bbox=tile_ts["bbox"], 
+                                transformation_models=[models.Transforms.from_tilespec(modelspec) 
+                                    for modelspec in tile_ts["transforms"]], compute_mask=compute_mask, 
+                                    compute_distances=compute_distances
+                                )
                             for tile_ts in tilespec]
 #         # Add the corresponding transformation
 #         for tile_ts, tile in zip(tilespec, self.single_tiles):
