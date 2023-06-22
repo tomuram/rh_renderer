@@ -75,7 +75,13 @@ class SingleTileRendererBase(object):
 
     def load(self):
         raise NotImplementedError("Please implement load in a derived class")
-    
+
+    async def async_cache(self):
+        '''setup to be run at the multiple_tiles level to concurrently perform the io operation
+        of cv2.imread. which is the slowest part of the code.
+        performs all the render tasks so it can set the flag self.already_rendered'''
+        self.render()
+        return    
     def render(self):
         """Returns the rendered image (after transformation), and the start point of the image in global coordinates"""
         if self.already_rendered:

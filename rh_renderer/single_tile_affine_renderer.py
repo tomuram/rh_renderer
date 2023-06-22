@@ -55,30 +55,9 @@ class SingleTileAffineRenderer:
 
     async def async_cache(self):
         '''setup to be run at the multiple_tiles level to concurrently perform the io operation
-        of cv2.imread. which is the slowest part of the code'''
-        if self.already_rendered:
-            return self.img, np.array([self.bbox[0], self.bbox[1]])
-
-        img = cv2.imread(self.img_path, cv2.IMREAD_ANYDEPTH)
-        adjusted_transform = self.transform_matrix[:2].copy()
-        adjusted_transform[0][2] -= self.bbox[0]
-        adjusted_transform[1][2] -= self.bbox[2]
-        
-        self.img = cv2.warpAffine(img, adjusted_transform, self.shape, flags=cv2.INTER_AREA)
-        self.already_rendered = True
-        if self.compute_mask:
-            mask_img = np.ones(img.shape)
-            self.mask = cv2.warpAffine(mask_img, adjusted_transform, self.shape, flags=cv2.INTER_AREA)
-            self.mask[self.mask > 0] = 1
-            self.mask = self.mask.astype(np.uint8)
-        if self.compute_distances:
-            # The initial weights for each pixel is the minimum from the image boundary
-            grid = np.mgrid[0:self.height, 0:self.width]
-            weights_img = np.minimum(
-                                np.minimum(grid[0], self.height - 1 - grid[0]),
-                                np.minimum(grid[1], self.width - 1 - grid[1])
-                            ).astype(np.float32)
-            self.weights = cv2.warpAffine(weights_img, adjusted_transform, self.shape, flags=cv2.INTER_AREA)
+        of cv2.imread. which is the slowest part of the code.
+        performs all the render tasks so it can set the flag self.already_rendered'''
+        self.render()
         return
 
     def render(self):
@@ -92,7 +71,6 @@ class SingleTileAffineRenderer:
         adjusted_transform[1][2] -= self.bbox[2]
         
         self.img = cv2.warpAffine(img, adjusted_transform, self.shape, flags=cv2.INTER_AREA)
-        self.already_rendered = True
         if self.compute_mask:
             mask_img = np.ones(img.shape)
             self.mask = cv2.warpAffine(mask_img, adjusted_transform, self.shape, flags=cv2.INTER_AREA)
@@ -106,6 +84,7 @@ class SingleTileAffineRenderer:
                                 np.minimum(grid[1], self.width - 1 - grid[1])
                             ).astype(np.float32)
             self.weights = cv2.warpAffine(weights_img, adjusted_transform, self.shape, flags=cv2.INTER_AREA)
+        self.already_rendered = True
         # Returns the transformed image and the start point
         return self.img, (self.bbox[0], self.bbox[2])
 
