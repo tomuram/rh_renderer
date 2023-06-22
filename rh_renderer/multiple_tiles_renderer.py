@@ -8,7 +8,7 @@ from enum import Enum
 import pyximport
 pyximport.install()
 from rh_renderer.blender.images_composer import PyImagesComposer
-
+import asyncio
 
 class BlendType(Enum):
     NO_BLENDING = 0
@@ -46,7 +46,24 @@ class MultipleTilesRenderer:
             bbox = single_tile.get_bbox()
             # using the (x_min, y_min, x_max, y_max) notation
             self.rtree.insert(single_tile, (bbox[0], bbox[2], bbox[1], bbox[3]))
- 
+    async def async_cache(self, points):
+        '''concurrent caching of all tiles in RAM
+        load and cache only tiles that will be used
+        Each point consists of a (from_x, from_y, to_x, to_y) for rtree.search'''
+        if len(self.single_tiles) == 0:
+            return
+        # filter only relevant tiles using rtree
+        ##this is loading the same tile twice sometimes since its a list instead of creating a set
+        tiles_to_load = []
+        unique_tiles = set()
+        for pt in points:
+            rect_res = self.rtree.search( pt )
+            for t in rect_res:
+                if t.img_path not in unique_tiles:
+                    tiles_to_load.append(t)
+                    unique_tiles.add(t.img_path)
+        await asyncio.gather(*[t.async_cache() for t in tiles_to_load])
+
         
     def render(self):
         if len(self.single_tiles) == 0:
