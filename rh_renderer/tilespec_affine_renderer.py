@@ -4,7 +4,7 @@ from .single_tile_affine_renderer import SingleTileAffineRenderer
 import json
 import numpy as np
 from . import models
-
+import asyncio
 
 class TilespecAffineRenderer:
 
@@ -26,7 +26,12 @@ class TilespecAffineRenderer:
             raise Exception('Unknown blend type')
 
         self.single_tiles = [SingleTileAffineRenderer(
-                                tile_ts["mipmapLevels"]["0"]["imageUrl"].replace("file://", ""), tile_ts["width"], tile_ts["height"], bbox=tile_ts["bbox"], transformation_models=[models.Transforms.from_tilespec(modelspec) for modelspec in tile_ts["transforms"]], compute_mask=compute_mask, compute_distances=compute_distances)
+                                tile_ts["mipmapLevels"]["0"]["imageUrl"].replace("file://", ""), 
+                                tile_ts["width"], tile_ts["height"], bbox=tile_ts["bbox"], 
+                                transformation_models=[models.Transforms.from_tilespec(modelspec) 
+                                    for modelspec in tile_ts["transforms"]], compute_mask=compute_mask, 
+                                    compute_distances=compute_distances
+                                )
                             for tile_ts in tilespec]
 #         # Add the corresponding transformation
 #         for tile_ts, tile in zip(tilespec, self.single_tiles):
@@ -35,7 +40,11 @@ class TilespecAffineRenderer:
 #                 tile.add_transformation(transform.get_matrix()[:2])
 
         self.multi_renderer = MultipleTilesAffineRenderer(self.single_tiles, blend_type=blend_type)
-        
+
+    def async_cache(self, points):
+        '''concurrent caching of all tiles in RAM
+        Each point consists of a (from_x, from_y, to_x, to_y) for rtree.search'''
+        asyncio.run(self.multi_renderer.async_cache(points))
 
     def render(self):
         return self.multi_renderer.render()

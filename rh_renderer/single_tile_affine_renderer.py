@@ -4,7 +4,7 @@
 import cv2
 import numpy as np
 import math
-
+import asyncio
 class SingleTileAffineRenderer:
     
 
@@ -53,6 +53,13 @@ class SingleTileAffineRenderer:
     def get_bbox(self):
         return self.bbox
 
+    async def async_cache(self):
+        '''setup to be run at the multiple_tiles level to concurrently perform the io operation
+        of cv2.imread. which is the slowest part of the code.
+        performs all the render tasks so it can set the flag self.already_rendered'''
+        self.render()
+        return
+
     def render(self):
         """Returns the rendered image (after transformation), and the start point of the image in global coordinates"""
         if self.already_rendered:
@@ -64,7 +71,6 @@ class SingleTileAffineRenderer:
         adjusted_transform[1][2] -= self.bbox[2]
         
         self.img = cv2.warpAffine(img, adjusted_transform, self.shape, flags=cv2.INTER_AREA)
-        self.already_rendered = True
         if self.compute_mask:
             mask_img = np.ones(img.shape)
             self.mask = cv2.warpAffine(mask_img, adjusted_transform, self.shape, flags=cv2.INTER_AREA)
@@ -78,6 +84,7 @@ class SingleTileAffineRenderer:
                                 np.minimum(grid[1], self.width - 1 - grid[1])
                             ).astype(np.float32)
             self.weights = cv2.warpAffine(weights_img, adjusted_transform, self.shape, flags=cv2.INTER_AREA)
+        self.already_rendered = True
         # Returns the transformed image and the start point
         return self.img, (self.bbox[0], self.bbox[2])
 

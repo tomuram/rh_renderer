@@ -5,7 +5,7 @@ import json
 import numpy as np
 from . import models
 import time
-
+import asyncio
 class TilespecRenderer:
 
     def __init__(self, tilespec, dtype=np.uint8, hist_adjuster=None, dynamic=True, blend_type=BlendType.MULTI_BAND_SEAM):
@@ -39,7 +39,10 @@ class TilespecRenderer:
 #                             for tile_ts in tilespec]
         else: # non dynamic
             self.single_tiles = [SingleTileStaticRenderer(
-                                    tile_ts["mipmapLevels"]["0"]["imageUrl"].replace("file://", ""), tile_ts["width"], tile_ts["height"], bbox=tile_ts["bbox"], transformation_models=[models.Transforms.from_tilespec(modelspec) for modelspec in tile_ts["transforms"]], compute_mask=compute_mask, compute_distances=compute_distances, hist_adjuster=hist_adjuster)
+                                    tile_ts["mipmapLevels"]["0"]["imageUrl"].replace("file://", ""), tile_ts["width"], 
+                                    tile_ts["height"], bbox=tile_ts["bbox"], 
+                                    transformation_models=[models.Transforms.from_tilespec(modelspec) for modelspec in tile_ts["transforms"]], 
+                                    compute_mask=compute_mask, compute_distances=compute_distances, hist_adjuster=hist_adjuster)
                                 for tile_ts in tilespec]
 
         print("single tile renderers setup time: {}".format(time.time() - st_time))
@@ -58,7 +61,10 @@ class TilespecRenderer:
         self.multi_renderer = MultipleTilesRenderer(self.single_tiles, blend_type=blend_type, dtype=dtype)
         print("multi tile renderer time: {}".format(time.time() - st_time))
 
-       
+    def async_cache(self, points):
+        '''concurrent caching of all tiles in RAM
+        Each point consists of a (from_x, from_y, to_x, to_y) for rtree.search'''
+        asyncio.run(self.multi_renderer.async_cache(points))
 
     def render(self):
         return self.multi_renderer.render()
